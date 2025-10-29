@@ -1,0 +1,56 @@
+name: grocery_manager
+description: A Flutter app for grocery shopping management with inventory tracking, expiration alerts, and menu suggestions.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.5 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Firebase dependencies
+  firebase_core: ^2.15.1
+  firebase_auth: ^4.7.2
+  cloud_firestore: ^4.8.4
+  firebase_messaging: ^14.6.5
+  firebase_storage: ^11.2.6
+  firebase_analytics: ^10.4.5
+  
+  # State management
+  provider: ^6.0.5
+  
+  # UI dependencies
+  cupertino_icons: ^1.0.6
+  material_design_icons_flutter: ^7.0.7296
+  
+  # Utility dependencies
+  intl: ^0.18.1
+  shared_preferences: ^2.2.0
+  image_picker: ^1.0.2
+  permission_handler: ^10.4.5
+  
+  # Networking
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+        - asset: fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: fonts/Roboto-Bold.ttf
+          weight: 700
