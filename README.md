@@ -48,27 +48,28 @@ cd grocery_manager
 flutter pub get
 ```
 
-### 3. Configurar Firebase
+### 3. Configurar Firebase ✅ COMPLETADO
 
-1. **Crear proyecto en Firebase Console:**
-   - Ve a: https://console.firebase.google.com/
-   - Crea un nuevo proyecto: "grocery-manager-app"
+**✅ Estado Actual:**
+- Proyecto Firebase creado: `grocery-manager-jvp-2024`
+- Firebase CLI instalado y autenticado
+- FlutterFire CLI configurado
+- Estructura de servicios implementada
 
-2. **Habilitar servicios:**
-   - Authentication (Email/Password)
-   - Firestore Database
-   - Cloud Messaging
+**🔧 Próximos pasos:**
+```bash
+# Para obtener claves API reales:
+flutterfire configure --project=grocery-manager-jvp-2024
 
-3. **Configurar FlutterFire:**
-   ```bash
-   # Instalar herramientas
-   npm install -g firebase-tools
-   dart pub global activate flutterfire_cli
-   
-   # Configurar proyecto
-   firebase login
-   flutterfire configure
-   ```
+# O seguir las instrucciones en:
+# Ver FIREBASE_SETUP.md para configuración detallada
+```
+
+**🔐 Servicios a habilitar en Firebase Console:**
+- ✅ Authentication (pendiente activar providers)
+- ✅ Firestore Database (pendiente crear)
+- ✅ Cloud Messaging
+- ✅ Cloud Storage
 
 ## 🔧 Desarrollo
 

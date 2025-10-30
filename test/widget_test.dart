@@ -11,20 +11,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grocery_manager/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Grocery Manager App smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const GroceryManagerApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the app loads with the inventory tab
+    expect(find.text('Mi Inventario'), findsOneWidget);
+    expect(find.text('Tu inventario está vacío'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Tap the floating action button specifically
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the dialog appears
+    expect(find.text('Firebase Configurado'), findsOneWidget);
   });
 }
