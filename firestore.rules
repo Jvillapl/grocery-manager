@@ -1,0 +1,119 @@
+// 🔒 REGLAS DE SEGURIDAD FIRESTORE
+// ==================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 👤 USUARIOS - Solo el propietario puede leer/escribir su perfil
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Subcollecciones del usuario
+      match /settings/{document} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /stats/{document} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // 🛒 INVENTARIOS - Solo el propietario puede acceder a su inventario
+    match /inventories/{userId}/items/{itemId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Validación de datos
+      allow create: if request.auth != null 
+        && request.auth.uid == userId
+        && isValidInventoryItem(request.resource.data);
+        
+      allow update: if request.auth != null 
+        && request.auth.uid == userId
+        && isValidInventoryItem(request.resource.data);
+    }
+    
+    // 🛍️ COMPRAS - Solo el propietario puede acceder a su historial
+    match /purchases/{userId}/history/{purchaseId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 🍳 RECETAS - Públicas para lectura, solo el autor puede modificar
+    match /recipes/{recipeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null 
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null 
+        && resource.data.createdBy == request.auth.uid;
+      allow delete: if request.auth != null 
+        && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // 📂 CATEGORÍAS - Lectura pública, solo admins pueden modificar las default
+    match /categories/{categoryId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null 
+        && (!resource.data.isDefault || isAdmin());
+      allow delete: if request.auth != null 
+        && (!resource.data.isDefault || isAdmin());
+    }
+    
+    // 🔔 NOTIFICACIONES - Solo el propietario puede acceder
+    match /notifications/{userId}/messages/{notificationId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 📋 LISTA DE COMPRAS - Solo el propietario puede acceder
+    match /shopping_lists/{userId}/items/{itemId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 📊 ESTADÍSTICAS GLOBALES - Solo lectura para usuarios autenticados
+    match /global_stats/{document} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // 🔧 FUNCIONES DE VALIDACIÓN
+    function isValidInventoryItem(data) {
+      return data.keys().hasAll(['name', 'category', 'quantity', 'unit', 'purchaseDate', 'expirationDate'])
+        && data.name is string && data.name.size() > 0
+        && data.category is string && data.category.size() > 0
+        && data.quantity is number && data.quantity >= 0
+        && data.unit is string && data.unit.size() > 0
+        && data.purchaseDate is timestamp
+        && data.expirationDate is timestamp
+        && data.expirationDate > data.purchaseDate;
+    }
+    
+    function isAdmin() {
+      // Por ahora, solo el creador del proyecto es admin
+      return request.auth != null && request.auth.uid == "YOUR_ADMIN_UID_HERE";
+    }
+    
+    // Función para verificar si el usuario puede acceder a un hogar compartido
+    function canAccessHousehold(userId) {
+      return request.auth != null 
+        && (request.auth.uid == userId 
+            || exists(/databases/$(database)/documents/users/$(request.auth.uid)/profile)
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)/profile).data.members.hasAny([userId]));
+    }
+  }
+}
+
+// 📝 NOTAS SOBRE SEGURIDAD:
+//
+// 1. Todos los datos requieren autenticación
+// 2. Los usuarios solo pueden acceder a sus propios datos
+// 3. Las recetas son públicas para lectura pero privadas para escritura
+// 4. Las categorías por defecto están protegidas
+// 5. Validación de datos en el servidor
+// 6. Preparado para funcionalidad multi-usuario (hogares compartidos)
+//
+// 🚀 PARA IMPLEMENTAR EN FIREBASE CONSOLE:
+// 1. Ve a Firestore Database
+// 2. Clic en "Rules"
+// 3. Reemplaza las reglas por defecto con este código
+// 4. Actualiza YOUR_ADMIN_UID_HERE con tu UID real
+// 5. Clic en "Publish"

@@ -34,11 +34,11 @@ class FirebaseConfig {
   static const String webApiKey = 'YOUR_WEB_API_KEY_HERE';
   static const String androidApiKey = 'YOUR_ANDROID_API_KEY_HERE';
   static const String messagingSenderId = 'YOUR_MESSAGING_SENDER_ID_HERE';
-  
+
   // URLs generadas automáticamente basadas en project ID
   static const String authDomain = '$projectId.firebaseapp.com';
   static const String storageBucket = '$projectId.appspot.com';
-  
+
   // Para desarrollo local
   static const bool useEmulator = true;
   static const String emulatorHost = 'localhost';
