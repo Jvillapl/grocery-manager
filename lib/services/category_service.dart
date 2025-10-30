@@ -19,9 +19,7 @@ class CategoryService {
         .orderBy('name')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Category.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
     });
   }
 
@@ -34,9 +32,7 @@ class CategoryService {
           .orderBy('sortOrder')
           .get();
 
-      return snapshot.docs
-          .map((doc) => Category.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
     } catch (e) {
       print('Error al obtener categorías por defecto: $e');
       return DefaultCategories.all;
@@ -46,10 +42,8 @@ class CategoryService {
   /// Obtiene una categoría específica por ID
   Future<Category?> getCategoryById(String categoryId) async {
     try {
-      final doc = await _firestore
-          .collection('categories')
-          .doc(categoryId)
-          .get();
+      final doc =
+          await _firestore.collection('categories').doc(categoryId).get();
 
       if (doc.exists) {
         return Category.fromFirestore(doc);
@@ -75,12 +69,12 @@ class CategoryService {
       if (snapshot.docs.isEmpty) {
         // Agregar categorías por defecto
         final batch = _firestore.batch();
-        
+
         for (final category in DefaultCategories.all) {
           final docRef = _firestore.collection('categories').doc(category.id);
           batch.set(docRef, category.toFirestore());
         }
-        
+
         await batch.commit();
         print('Categorías por defecto inicializadas');
       }
@@ -92,9 +86,8 @@ class CategoryService {
   /// Agrega una nueva categoría personalizada
   Future<String> addCustomCategory(Category category) async {
     try {
-      final docRef = await _firestore
-          .collection('categories')
-          .add(category.toFirestore());
+      final docRef =
+          await _firestore.collection('categories').add(category.toFirestore());
 
       return docRef.id;
     } catch (e) {
@@ -103,12 +96,10 @@ class CategoryService {
   }
 
   /// Actualiza una categoría existente
-  Future<void> updateCategory(String categoryId, Map<String, dynamic> updates) async {
+  Future<void> updateCategory(
+      String categoryId, Map<String, dynamic> updates) async {
     try {
-      await _firestore
-          .collection('categories')
-          .doc(categoryId)
-          .update(updates);
+      await _firestore.collection('categories').doc(categoryId).update(updates);
     } catch (e) {
       throw Exception('Error al actualizar categoría: $e');
     }
@@ -117,18 +108,13 @@ class CategoryService {
   /// Elimina una categoría (solo si no es por defecto)
   Future<void> deleteCategory(String categoryId) async {
     try {
-      final doc = await _firestore
-          .collection('categories')
-          .doc(categoryId)
-          .get();
+      final doc =
+          await _firestore.collection('categories').doc(categoryId).get();
 
       if (doc.exists) {
         final category = Category.fromFirestore(doc);
         if (!category.isDefault) {
-          await _firestore
-              .collection('categories')
-              .doc(categoryId)
-              .delete();
+          await _firestore.collection('categories').doc(categoryId).delete();
         } else {
           throw Exception('No se pueden eliminar categorías por defecto');
         }
@@ -169,16 +155,72 @@ class CategoryService {
   /// Sugiere categoría basada en el nombre del producto
   String suggestCategory(String productName) {
     final name = productName.toLowerCase();
-    
+
     // Mapeo simple de palabras clave a categorías
     final Map<String, List<String>> categoryKeywords = {
-      'fruits': ['manzana', 'naranja', 'plátano', 'uva', 'fresa', 'mango', 'piña', 'pera', 'durazno', 'kiwi'],
-      'vegetables': ['tomate', 'cebolla', 'ajo', 'papa', 'zanahoria', 'lechuga', 'pepino', 'apio', 'brócoli', 'espinaca'],
+      'fruits': [
+        'manzana',
+        'naranja',
+        'plátano',
+        'uva',
+        'fresa',
+        'mango',
+        'piña',
+        'pera',
+        'durazno',
+        'kiwi'
+      ],
+      'vegetables': [
+        'tomate',
+        'cebolla',
+        'ajo',
+        'papa',
+        'zanahoria',
+        'lechuga',
+        'pepino',
+        'apio',
+        'brócoli',
+        'espinaca'
+      ],
       'dairy': ['leche', 'queso', 'yogur', 'crema', 'mantequilla', 'requesón'],
-      'meat': ['pollo', 'res', 'cerdo', 'pescado', 'camarón', 'carne', 'jamón', 'salchicha'],
-      'grains': ['arroz', 'pasta', 'pan', 'cereal', 'avena', 'quinoa', 'trigo', 'maíz'],
-      'beverages': ['agua', 'jugo', 'refresco', 'cerveza', 'vino', 'café', 'té'],
-      'condiments': ['sal', 'pimienta', 'aceite', 'vinagre', 'salsa', 'especias', 'condimento'],
+      'meat': [
+        'pollo',
+        'res',
+        'cerdo',
+        'pescado',
+        'camarón',
+        'carne',
+        'jamón',
+        'salchicha'
+      ],
+      'grains': [
+        'arroz',
+        'pasta',
+        'pan',
+        'cereal',
+        'avena',
+        'quinoa',
+        'trigo',
+        'maíz'
+      ],
+      'beverages': [
+        'agua',
+        'jugo',
+        'refresco',
+        'cerveza',
+        'vino',
+        'café',
+        'té'
+      ],
+      'condiments': [
+        'sal',
+        'pimienta',
+        'aceite',
+        'vinagre',
+        'salsa',
+        'especias',
+        'condimento'
+      ],
       'frozen': ['helado', 'congelado', 'frozen'],
     };
 
@@ -203,7 +245,7 @@ class CategoryService {
           .get();
 
       final Map<String, int> usage = {};
-      
+
       for (final doc in snapshot.docs) {
         final data = doc.data();
         final category = data['category'] as String? ?? 'other';
@@ -220,14 +262,11 @@ class CategoryService {
   /// Obtiene categorías más usadas por el usuario
   Future<List<String>> getTopCategories(String userId, {int limit = 5}) async {
     final stats = await getCategoryUsageStats(userId);
-    
+
     final sorted = stats.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
-    return sorted
-        .take(limit)
-        .map((entry) => entry.key)
-        .toList();
+
+    return sorted.take(limit).map((entry) => entry.key).toList();
   }
 
   /// Valida que el nombre de categoría no exista
@@ -250,18 +289,19 @@ class CategoryService {
     try {
       // Firestore no soporta búsqueda de texto completo nativa
       // Esta es una implementación básica
-      final snapshot = await _firestore
-          .collection('categories')
-          .get();
+      final snapshot = await _firestore.collection('categories').get();
 
-      final categories = snapshot.docs
-          .map((doc) => Category.fromFirestore(doc))
+      final categories =
+          snapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
+
+      return categories
+          .where((category) =>
+              category.name.toLowerCase().contains(query.toLowerCase()) ||
+              (category.description
+                      ?.toLowerCase()
+                      .contains(query.toLowerCase()) ??
+                  false))
           .toList();
-
-      return categories.where((category) =>
-          category.name.toLowerCase().contains(query.toLowerCase()) ||
-          (category.description?.toLowerCase().contains(query.toLowerCase()) ?? false)
-      ).toList();
     } catch (e) {
       print('Error al buscar categorías: $e');
       return [];

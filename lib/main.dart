@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+import 'screens/setup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,12 +32,85 @@ class GroceryManagerApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
+      home: const AppInitializer(),
+      routes: {
+        '/home': (context) => const HomeScreen(),
+        '/setup': (context) => const SetupScreen(),
+      },
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  bool _isLoading = true;
+  bool _needsSetup = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialSetup();
+  }
+
+  Future<void> _checkInitialSetup() async {
+    try {
+      // Verificar si Firebase está funcionando
+      final user = FirebaseAuth.instance.currentUser;
+      
+      // Si no hay usuario, mostrar setup
+      if (user == null) {
+        setState(() {
+          _needsSetup = true;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Usuario existe, ir directo a la app
+      setState(() {
+        _needsSetup = false;
+        _isLoading = false;
+      });
+      
+    } catch (e) {
+      // Error en Firebase, mostrar setup
+      setState(() {
+        _needsSetup = true;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Iniciando Grocery Manager...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_needsSetup) {
+      return const SetupScreen();
+    }
+
+    return const HomeScreen();
+  }
+}class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
